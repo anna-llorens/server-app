@@ -2,19 +2,26 @@ import express, { Request, Response } from "express";
 import { Pool } from "pg";
 import cors from "cors";
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
 
+// Load environment variables from .env file
+dotenv.config();
+
+// Initialize the Express app
 const app = express();
 const port = 6000;
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
+// Database connection configuration
 const pool = new Pool({
-  user: "yourusername",
-  host: "localhost",
-  database: "yourdatabase",
-  password: "yourpassword",
-  port: 5432,
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: parseInt(process.env.PGPORT as string, 10), // Convert port to number
 });
 
 pool.connect((err) => {
