@@ -19,10 +19,10 @@ CREATE DATABASE db_name OWNER postgres;
 \q
 
 # Connect to the db:
-psql -U postgres -d db_name
-# or with specific user
-psql -d postgres -U user
-\c db_name
+psql -U postgres -d osprean_db
+# or with specific user (postgres user)
+psql -d postgres -U postgres
+\c osprean_db
 ```
 
 ## Adding data to DB
