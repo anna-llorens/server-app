@@ -1,4 +1,4 @@
-import { pool } from "..";
+import { pool } from "../config";
 
 interface Node {
   name: string;
@@ -22,6 +22,7 @@ const createNode = async (node: Node): Promise<string> => {
       "INSERT INTO nodes (name, type) VALUES ($1, $2) RETURNING *",
       [name, type]
     );
+
     return JSON.stringify(results.rows[0]);
   } catch (error) {
     console.error(error);

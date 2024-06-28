@@ -32,7 +32,8 @@ psql -d postgres -U postgres
 CREATE TABLE nodes (
     id SERIAL PRIMARY KEY,       -- 'id' is a serial primary key, auto-incremented
     name VARCHAR(30),            -- 'name' is a variable character field with a maximum length of 30
-    description VARCHAR(2000)             -- 'description' is a variable character field with a maximum length of 2000
+    description VARCHAR(2000)    -- 'description' is a variable character field with a maximum length of 2000
+    
 );
 
 -- Step 2: Create an enum type 'NodeType' with possible values 'person' and 'asset'
