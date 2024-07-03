@@ -35,9 +35,9 @@ app.use(function (req, res, next) {
 
 checkDbConnection();
 
-// app.get("/", (req, res) => {
-//   res.status(200).send("DB server running");
-// });
+app.get("/", (req, res) => {
+  res.status(200).send("Server is running");
+});
 
 // Get nodes
 app.get("/nodes", async (req, res) => {
@@ -53,8 +53,8 @@ app.post("/nodes", async (req, res) => {
   try {
     const response = await createNode(req.body);
     res.status(200).send(response);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
   }
 });
 

@@ -1,9 +1,10 @@
 import { pool } from "../config";
 
-interface Node {
-  name: string;
-  type: string;
-}
+type Node = {
+  name?: string;
+  type?: string;
+  description?: string;
+};
 
 const getNodes = async (): Promise<any> => {
   try {
@@ -16,17 +17,20 @@ const getNodes = async (): Promise<any> => {
 };
 
 const createNode = async (node: Node): Promise<string> => {
-  const { name, type } = node;
+  const { name, type, description } = node;
   try {
     const results = await pool.query(
-      "INSERT INTO nodes (name, type) VALUES ($1, $2) RETURNING *",
-      [name, type]
+      "INSERT INTO nodes (name, type, description) VALUES ($1, $2, $3) RETURNING *",
+      [name, type, description]
     );
 
     return JSON.stringify(results.rows[0]);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to create node");
+  } catch (error: any) {
+    console.error("Database error:", error);
+    if (error.message.includes("invalid input value")) {
+      throw { status: 500, message: `Invalid input value for type: ${type}` };
+    }
+    throw { status: 500, message: "Failed to create node" };
   }
 };
 
@@ -41,11 +45,11 @@ const deleteNode = async (id: string): Promise<string> => {
 };
 
 const updateNode = async (id: string, node: Partial<Node>): Promise<string> => {
-  const { name, type } = node;
+  const { name, type, description } = node;
   try {
     const results = await pool.query(
-      "UPDATE nodes SET name = $1, type = $2 WHERE id = $3 RETURNING *",
-      [name, type, id]
+      "UPDATE nodes SET name = $1, type = $2, description = $3 WHERE id = $4 RETURNING *",
+      [name, type, description, id]
     );
     return JSON.stringify(results.rows[0]);
   } catch (error) {
