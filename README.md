@@ -1,6 +1,6 @@
 # Nodes Backend App
 
-Backend for Nodes app
+RESTful API with Node.js, Express, TypeScript, and PostgreSQL
 
 ## Quick start
 ```bash
@@ -14,5 +14,4 @@ npm run dev
 psql -U postgres -d osprean_db
 ```
 
-## About App
-This project is a backend server built with Node.js, Express, and PostgreSQL, and TypeScript
+

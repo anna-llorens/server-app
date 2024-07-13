@@ -10,6 +10,14 @@ import {
   deleteNode,
   updateNode,
 } from "./models/node-model";
+import {
+  createUser,
+  deleteUser,
+  getUserById,
+  getUsers,
+  updateUser,
+  loginUser,
+} from "./models/user-model";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -77,6 +85,13 @@ app.put("/nodes/:id", async (req: Request, res: Response): Promise<void> => {
     res.status(500).send(error);
   }
 });
+
+app.post("/auth/login", loginUser);
+app.get("/users", getUsers);
+app.get("/users/:id", getUserById);
+app.post("/users", createUser);
+app.put("/users/:id", updateUser);
+app.delete("/users/:id", deleteUser);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
