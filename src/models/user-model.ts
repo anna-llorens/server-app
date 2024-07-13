@@ -1,6 +1,19 @@
 import { Request, Response } from "express";
 import { pool } from "../config";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+
+const createToken = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(16, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data.toString("base64"));
+      }
+    });
+  });
+};
 
 export const getUsers = (request: Request, response: Response): void => {
   pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
@@ -93,7 +106,12 @@ export const loginUser = async (
         const user = results.rows[0];
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
-          response.status(200).send(user);
+          try {
+            const token = await createToken();
+            response.status(200).json({ user, token });
+          } catch (tokenError) {
+            response.status(500).send(`Error creating token: ${tokenError}`);
+          }
         } else {
           response.status(401).send("Invalid password");
         }
