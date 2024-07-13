@@ -1,4 +1,4 @@
-# Setup App
+# Setup App Database
 
 ## PostgreSQL 
 
@@ -35,7 +35,10 @@ CREATE TABLE nodes (
     description VARCHAR(2000)    -- 'description' is a variable character field with a maximum length of 2000
     
 );
+```
 
+## Nodes
+```sql
 -- Step 2: Create an enum type 'NodeType' with possible values 'person' and 'asset'
 CREATE TYPE NodeType AS ENUM ('person', 'asset' , 'team', 'other');
 
@@ -54,6 +57,25 @@ INSERT INTO nodes (name, type, description) VALUES ('Asset 1', 'asset', 'This is
 
 ```
 
+## Users
+
+```sql
+-- Step 1: Create the 'users' table
+CREATE TABLE users (
+  ID SERIAL PRIMARY KEY,
+  name VARCHAR(30),
+  email VARCHAR(30)
+);
+
+-- Step 2: Correctly add a 'password' column to the 'users' table
+ALTER TABLE users ADD COLUMN password VARCHAR(255);
+
+-- Step 3: Define an enum type 'UserRole' with possible values 'admin', 'editor', and 'viewer'
+CREATE TYPE UserRole AS ENUM ('admin', 'editor', 'viewer');
+
+-- Step 4: Add a 'role' column to the 'users' table using the 'UserRole' enum
+ALTER TABLE users ADD COLUMN role UserRole;
+```
 ```bash
 # list tables
 \dt

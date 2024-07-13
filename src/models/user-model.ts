@@ -35,28 +35,25 @@ export const getUserById = (request: Request, response: Response): void => {
   });
 };
 
-import { QueryResult } from "pg";
-
 export const createUser = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  const { name, email, password } = request.body;
+  const { name, email, password, role: userRole } = request.body;
 
-  // Hash the password before storing it
-  const saltRounds = 10; // It's a good practice to make this configurable
+  const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const role = userRole ?? "user";
 
   pool.query(
-    "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
-    [name, email, hashedPassword],
+    "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)",
+    [name, email, hashedPassword, role],
     (error, results) => {
       if (error) {
         response.status(500).send(`Error adding user: ${error.message}`);
         return;
       }
-      // Assuming your DB setup does not automatically return the insertId, adjust accordingly.
-      response.status(201).send(`User added`);
+      response.status(201).send(`User added with default role 'user'`);
     }
   );
 };
