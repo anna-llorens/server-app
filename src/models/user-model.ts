@@ -7,18 +7,6 @@ import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-const createToken = (): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    crypto.randomBytes(16, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data.toString("base64"));
-      }
-    });
-  });
-};
-
 const getUserByToken = async (token: string) => {
   return new Promise((resolve, reject) => {
     pool.query(
@@ -79,11 +67,10 @@ export const createUser = async (
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   const role = userRole ?? "user";
-  const token = await createToken();
 
   pool.query(
-    "INSERT INTO users (name, email, password, role, token) VALUES ($1, $2, $3, $4, $5)",
-    [name, email, hashedPassword, role, token],
+    "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)",
+    [name, email, hashedPassword, role],
     (error, results) => {
       if (error) {
         response.status(500).send(`Error adding user: ${error.message}`);
