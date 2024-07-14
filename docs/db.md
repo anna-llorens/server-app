@@ -25,6 +25,12 @@ psql -d postgres -U postgres
 \c osprean_db
 ```
 
+### Generate a JWT_SECRET
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+Added to the .env file
+
 ## Adding data to DB
 
 ```sql

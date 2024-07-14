@@ -14,11 +14,13 @@ import {
   createUser,
   deleteUser,
   getMe,
+  getUser,
   getUserById,
   getUsers,
   loginUser,
   updateUser,
 } from "./models/user-model";
+import { auth } from "./auth";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -94,7 +96,24 @@ app.post("/users", createUser);
 app.put("/users/:id", updateUser);
 app.delete("/users/:id", deleteUser);
 app.post("/login", loginUser);
-app.get("/me", getMe);
+
+app.get("/user", auth, async (req: any, res: Response) => {
+  try {
+    const user = await getUser(req);
+    if (!user) {
+      return res.sendStatus(404);
+    }
+
+    res.json({
+      email: user.email,
+      role: user.role,
+      name: user.name,
+    });
+  } catch (error) {
+    console.error("Failed to fetch user info:", error);
+    res.sendStatus(500);
+  }
+});
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);

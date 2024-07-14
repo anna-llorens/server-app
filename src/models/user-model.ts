@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import { pool } from "../config";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+
+dotenv.config();
 
 const createToken = (): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -40,14 +44,29 @@ export const getUsers = (request: Request, response: Response): void => {
   });
 };
 
-export const getUserById = (request: Request, response: Response): void => {
+export const getUserById = (request: Request, response?: Response): void => {
   const id = parseInt(request.params.id);
 
   pool.query("SELECT * FROM users WHERE id = $1", [id], (error, results) => {
     if (error) {
       throw error;
     }
-    response.status(200).json(results.rows);
+    response?.status(200).json(results.rows);
+  });
+};
+export const getUser = (request: any): Promise<any> => {
+  const id = parseInt(request?.user?.id);
+
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT * FROM users WHERE id = $1", [id], (error, results) => {
+      if (error) {
+        return reject(error);
+      }
+      if (results.rows.length === 0) {
+        return resolve(null);
+      }
+      resolve(results.rows[0]);
+    });
   });
 };
 
@@ -116,25 +135,19 @@ export const loginUser = async (
         response.status(500).send(`Error fetching user: ${error.message}`);
         return;
       }
+
       if (results.rows.length > 0) {
         const user = results.rows[0];
         const passwordMatch = await bcrypt.compare(password, user.password);
+
         if (passwordMatch) {
           try {
-            const token = await createToken();
-            pool.query(
-              "UPDATE users SET token = $1 WHERE email = $2",
-              [token, email],
-              (updateError) => {
-                if (updateError) {
-                  response
-                    .status(500)
-                    .send(`Error updating token: ${updateError}`);
-                  return;
-                }
-                response.status(200).json({ user, token });
-              }
-            );
+            const payload = { user: { id: user.id } };
+            const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+              expiresIn: "1h",
+            });
+
+            response.status(200).json({ user, token });
           } catch (tokenError) {
             response.status(500).send(`Error creating token: ${tokenError}`);
           }
