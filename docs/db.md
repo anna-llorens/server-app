@@ -55,6 +55,8 @@ ALTER COLUMN type TYPE NodeType USING type::NodeType;
 -- Step 4: Insert a new record into the 'nodes' table with values for 'name', 'type', and 'description'
 INSERT INTO nodes (name, type, description) VALUES ('Asset 1', 'asset', 'This is the Asset 1 description');
 
+ALTER TABLE users ADD COLUMN token VARCHAR(255);
+
 ```
 
 ## Users

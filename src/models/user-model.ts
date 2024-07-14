@@ -15,6 +15,22 @@ const createToken = (): Promise<string> => {
   });
 };
 
+const getUserByToken = async (token: string) => {
+  return new Promise((resolve, reject) => {
+    pool.query(
+      "SELECT * FROM users WHERE token = $1",
+      [token],
+      (error, results) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results.rows[0]);
+        }
+      }
+    );
+  });
+};
+
 export const getUsers = (request: Request, response: Response): void => {
   pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
     if (error) {
@@ -44,10 +60,11 @@ export const createUser = async (
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   const role = userRole ?? "user";
+  const token = await createToken();
 
   pool.query(
-    "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)",
-    [name, email, hashedPassword, role],
+    "INSERT INTO users (name, email, password, role, token) VALUES ($1, $2, $3, $4, $5)",
+    [name, email, hashedPassword, role, token],
     (error, results) => {
       if (error) {
         response.status(500).send(`Error adding user: ${error.message}`);
@@ -105,7 +122,19 @@ export const loginUser = async (
         if (passwordMatch) {
           try {
             const token = await createToken();
-            response.status(200).json({ user, token });
+            pool.query(
+              "UPDATE users SET token = $1 WHERE email = $2",
+              [token, email],
+              (updateError) => {
+                if (updateError) {
+                  response
+                    .status(500)
+                    .send(`Error updating token: ${updateError}`);
+                  return;
+                }
+                response.status(200).json({ user, token });
+              }
+            );
           } catch (tokenError) {
             response.status(500).send(`Error creating token: ${tokenError}`);
           }
@@ -117,4 +146,29 @@ export const loginUser = async (
       }
     }
   );
+};
+
+export const getMe = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
+  const authHeader = request.headers.authorization;
+
+  if (!authHeader) {
+    response.status(401).send("Authorization header missing");
+    return;
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const user = await getUserByToken(token);
+    if (!user) {
+      response.status(404).send("User not found");
+      return;
+    }
+    response.status(200).json(user);
+  } catch (error) {
+    response.status(500).send(`Error fetching user: ${error}`);
+  }
 };

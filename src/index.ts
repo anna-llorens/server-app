@@ -13,10 +13,11 @@ import {
 import {
   createUser,
   deleteUser,
+  getMe,
   getUserById,
   getUsers,
-  updateUser,
   loginUser,
+  updateUser,
 } from "./models/user-model";
 
 // Load environment variables from .env file
@@ -92,7 +93,9 @@ app.get("/users/:id", getUserById);
 app.post("/users", createUser);
 app.put("/users/:id", updateUser);
 app.delete("/users/:id", deleteUser);
+app.post("/login", loginUser);
+app.get("/me", getMe);
 
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`App running on port ${port}.`);
 });
