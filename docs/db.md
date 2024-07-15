@@ -88,3 +88,55 @@ ALTER TABLE users ADD COLUMN role UserRole;
 # list tables
 \dt
 ```
+
+
+## Teams and Organizations
+
+1. Create the teams table:
+Columns: id, organizationId, name.
+organizationId should be a foreign key referencing the organizations table.
+
+2. Create the organizations table:
+Columns: id, name.
+
+3. Update the users table:
+Add columns teamId and organizationId.
+Both teamId and organizationId should be foreign keys referencing the respective tables.
+
+4. Add foreign keys:
+Ensure that teamId in the users table references teams(id).
+Ensure that organizationId in the users table references organizations(id).
+Ensure that organizationId in the teams table references organizations(id).
+
+```sql
+-- 1. Create the organizations table
+CREATE TABLE organizations (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+-- 2. Create the teams table
+CREATE TABLE teams (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    organizationId INT,
+    CONSTRAINT fk_organization
+      FOREIGN KEY(organizationId) 
+	  REFERENCES organizations(id)
+);
+
+-- 3. Update the users table to include teamId and organizationId
+ALTER TABLE users
+ADD COLUMN teamId INT,
+ADD COLUMN organizationId INT;
+
+-- 4. Add foreign key constraints to the users table
+ALTER TABLE users
+ADD CONSTRAINT fk_team
+  FOREIGN KEY(teamId) 
+  REFERENCES teams(id),
+ADD CONSTRAINT fk_organization
+  FOREIGN KEY(organizationId) 
+  REFERENCES organizations(id);
+
+```
