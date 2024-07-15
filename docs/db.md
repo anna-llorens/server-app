@@ -139,4 +139,21 @@ ADD CONSTRAINT fk_organization
   FOREIGN KEY(organizationId) 
   REFERENCES organizations(id);
 
+  -- 5. Add indexes to the teamId and organizationId columns in the users
+CREATE INDEX idx_users_teamId ON users(teamId);
+CREATE INDEX idx_users_organizationId ON users(organizationId);
+
+
+```
+## Api calls
+
+```bash
+url -X PUT http://localhost:3001/users/40 \ 
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Anna RRR",
+  "email": "anna@example.com",
+  "password": "123"
+}'
+
 ```
