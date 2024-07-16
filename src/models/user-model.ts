@@ -7,10 +7,8 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 export const getUsers = (request: Request, response: Response): void => {
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
+  console.info(new Date().toISOString(), "/users", "getUsers");
 
-  console.log("getUsers -->", request.params);
   const query = `
     SELECT 
       users.id as user_id, users.name as user_name, users.email, users.role,
@@ -44,10 +42,13 @@ export const getUsers = (request: Request, response: Response): void => {
 
 export const getUserById = (request: Request, response?: Response): void => {
   const id = parseInt(request.params.id);
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
-
-  console.log("getUserById -->", id);
+  console.info(
+    new Date().toISOString(),
+    "/users/:userId",
+    "getUserById",
+    "userId:",
+    id
+  );
 
   pool.query("SELECT * FROM users WHERE id = $1", [id], (error, results) => {
     if (error) {
@@ -56,6 +57,7 @@ export const getUserById = (request: Request, response?: Response): void => {
     response?.status(200).json(results.rows);
   });
 };
+
 export const getUser = async (request: any, res: Response): Promise<any> => {
   const id = parseInt(request?.user?.id);
 
@@ -103,9 +105,8 @@ export const createUser = async (
   response: Response
 ): Promise<void> => {
   const { name, email, password, role: userRole } = request.body;
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
-  console.log("createUser -->", name, email, password, userRole);
+
+  console.info(new Date().toISOString(), "/users", "createUser", name);
 
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -130,12 +131,8 @@ export const updateUser = async (
 ): Promise<void> => {
   const id = parseInt(request.params.id);
   const { name, email, password } = request.body;
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
+  console.info(new Date().toISOString(), "/users", "updateUser", id);
 
-  console.log("updateUser -->", id, name, email, password);
-
-  // If password is provided, hash it
   let hashedPassword;
   if (password) {
     const saltRounds = 10;
@@ -143,7 +140,6 @@ export const updateUser = async (
     hashedPassword = await bcrypt.hash(password, saltRounds);
   }
 
-  // Prepare SQL query and parameters
   let query = "UPDATE users SET name = $1, email = $2";
   const params = [name, email];
 
@@ -156,7 +152,6 @@ export const updateUser = async (
     params.push(id);
   }
 
-  // Execute SQL query
   pool.query(query, params, (error, results) => {
     if (error) {
       response.status(500).send(`Error updating user: ${error.message}`);
@@ -168,10 +163,7 @@ export const updateUser = async (
 
 export const deleteUser = (request: Request, response: Response): void => {
   const id = parseInt(request.params.id);
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
-  console.log("deleteUser -->", id, "request.params.id");
-
+  console.info(new Date().toISOString(), "/users/:id", "deleteUser", id);
   pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
     if (error) {
       throw error;
@@ -185,13 +177,7 @@ export const login = async (
   response: Response
 ): Promise<void> => {
   const { email, password } = request.body;
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
-
-  console.info("Endpoint: /login");
-  console.info("login -->", email, password);
-  console.info("---------------------------------------------");
-  console.info("Timestamp:", new Date().toISOString());
+  console.info(new Date().toISOString(), "/login", "email", email);
 
   pool.query(
     "SELECT * FROM users WHERE email = $1",
@@ -224,6 +210,39 @@ export const login = async (
         }
       } else {
         response.status(404).send("User not found");
+      }
+    }
+  );
+};
+
+export const getTeamsByOrganization = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
+  const { organizationId } = request.params;
+  console.info(
+    new Date().toISOString(),
+    "/organizations/:organizationId/teams",
+    "getTeamsByOrganization",
+    organizationId
+  );
+
+  pool.query(
+    "SELECT * FROM teams WHERE organizationId = $1",
+    [organizationId],
+    (error, results) => {
+      if (error) {
+        response.status(500).send(`Error fetching teams: ${error.message}`);
+        return;
+      }
+
+      if (results.rows.length > 0) {
+        const teams = results.rows;
+        console.log("Teams found for organization:", teams);
+
+        response.status(200).json(results.rows);
+      } else {
+        response.status(404).send("No teams found for this organization");
       }
     }
   );

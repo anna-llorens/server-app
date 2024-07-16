@@ -7,6 +7,8 @@ type Node = {
 };
 
 const getNodes = async (): Promise<any> => {
+  console.info(new Date().toISOString(), "/nodes", "getNodes");
+
   try {
     const results = await pool.query("SELECT * FROM nodes;");
     return results.rows;
@@ -18,6 +20,15 @@ const getNodes = async (): Promise<any> => {
 
 const createNode = async (node: Node): Promise<string> => {
   const { name, type, description } = node;
+  console.info(
+    new Date().toISOString(),
+    "/nodes",
+    "createNode",
+    "name:",
+    name,
+    "type:",
+    type
+  );
   try {
     const results = await pool.query(
       "INSERT INTO nodes (name, type, description) VALUES ($1, $2, $3) RETURNING *",
@@ -35,6 +46,8 @@ const createNode = async (node: Node): Promise<string> => {
 };
 
 const deleteNode = async (id: string): Promise<string> => {
+  console.info(new Date().toISOString(), "/nodes/:id", "deleteNode", id);
+
   try {
     await pool.query("DELETE FROM nodes WHERE id = $1", [id]);
     return `Node deleted with ID: ${id}`;
@@ -45,6 +58,7 @@ const deleteNode = async (id: string): Promise<string> => {
 };
 
 const updateNode = async (id: string, node: Partial<Node>): Promise<string> => {
+  console.info(new Date().toISOString(), "/nodes/:id", "updateNode", id);
   const { name, type, description } = node;
   try {
     const results = await pool.query(

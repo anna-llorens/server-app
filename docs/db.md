@@ -144,16 +144,27 @@ CREATE INDEX idx_users_teamId ON users(teamId);
 CREATE INDEX idx_users_organizationId ON users(organizationId);
 
 
+UPDATE users
+SET teamid = 1, 
+    organizationid = 1 
+WHERE email = 'anna@example.com'; 
+
 ```
 ## Api calls
 
 ```bash
-url -X PUT http://localhost:3001/users/40 \ 
+
+## Reset User
+curl -X PUT http://localhost:3001/users/44 \ 
 -H "Content-Type: application/json" \
 -d '{
   "name": "Anna RRR",
   "email": "anna@example.com",
-  "password": "123"
+  "password": "123", 
+  "role": "admin"
 }'
+
+## Get teams
+curl http://localhost:3001/organizations/1/teams
 
 ```
