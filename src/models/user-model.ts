@@ -130,7 +130,7 @@ export const updateUser = async (
   response: Response
 ): Promise<void> => {
   const id = parseInt(request.params.id);
-  const { name, email, password } = request.body;
+  const { name, email, password, team, organization } = request.body;
   console.info(new Date().toISOString(), "/users", "updateUser", id);
 
   let hashedPassword;
@@ -140,20 +140,23 @@ export const updateUser = async (
     hashedPassword = await bcrypt.hash(password, saltRounds);
   }
 
-  let query = "UPDATE users SET name = $1, email = $2";
-  const params = [name, email];
+  let query =
+    "UPDATE users SET name = $1, email = $2, teamId = $3, organizationId = $4";
+  const params = [name, email, team.id, organization.id];
 
   if (hashedPassword) {
-    query += ", password = $3 WHERE id = $4";
+    query += ", password = $4 WHERE id = $5";
     params.push(hashedPassword, id);
     console.log("Updating password for user with ID: ", id);
   } else {
-    query += " WHERE id = $3";
+    query += " WHERE id = $5";
     params.push(id);
   }
 
   pool.query(query, params, (error, results) => {
     if (error) {
+      console.log("Error updating user:", error.message);
+
       response.status(500).send(`Error updating user: ${error.message}`);
       return;
     }
@@ -237,13 +240,37 @@ export const getTeamsByOrganization = async (
       }
 
       if (results.rows.length > 0) {
-        const teams = results.rows;
-        console.log("Teams found for organization:", teams);
-
-        response.status(200).json(results.rows);
+        const teams = results.rows.map((team) => ({
+          ...team,
+          id: String(team.id),
+        }));
+        response.status(200).json(teams);
       } else {
         response.status(404).send("No teams found for this organization");
       }
     }
   );
+};
+
+export const getOrganizations = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
+  console.info(new Date().toISOString(), "/organizations", "getOrganizations");
+
+  pool.query("SELECT * FROM organizations", (error, results) => {
+    if (error) {
+      response
+        .status(500)
+        .send(`Error fetching organizations: ${error.message}`);
+      return;
+    }
+
+    if (results.rows.length > 0) {
+      console.log("Organizations found:", results.rows);
+      response.status(200).json(results.rows);
+    } else {
+      response.status(404).send("No organizations found");
+    }
+  });
 };

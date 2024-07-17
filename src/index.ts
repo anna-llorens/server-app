@@ -13,6 +13,7 @@ import {
 import {
   createUser,
   deleteUser,
+  getOrganizations,
   getTeamsByOrganization,
   getUser,
   getUserById,
@@ -112,9 +113,11 @@ app.get("/user", auth, async (req: any, res: Response) => {
   }
 });
 
+// Organizations
+app.get("/organizations", getOrganizations);
+
+// Teams
 app.get("/organizations/:organizationId/teams", getTeamsByOrganization);
-
-
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);

@@ -154,6 +154,16 @@ WHERE email = 'anna@example.com';
 
 ```bash
 
+## Add new User
+curl -X POST http://localhost:3001/users \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Admin user",
+  "email": "admin@admin.com",
+  "password": "123", 
+  "role": "admin"
+}'
+
 ## Reset User
 curl -X PUT http://localhost:3001/users/44 \ 
 -H "Content-Type: application/json" \
@@ -166,5 +176,7 @@ curl -X PUT http://localhost:3001/users/44 \
 
 ## Get teams
 curl http://localhost:3001/organizations/1/teams
+
+
 
 ```
